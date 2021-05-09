@@ -1,0 +1,6 @@
+Etudes : Genetic Algorithm
+
+GGA.py : basic WIP library
+basic_neural.py : XOR implementation
+neural_flappy.py : flappy bird neural implementation
+exemple.py : affine function search exemple
