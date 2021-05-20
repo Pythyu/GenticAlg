@@ -1,5 +1,6 @@
 import math
 import random
+import time
 from GGA import *
 
 ########### Flappt Neural network ###############
@@ -59,7 +60,7 @@ Vspeed = 1
 def PipeGenerator():
     x = 10
     while True:
-        inter = 5
+        inter = 3
         MX = random.randint(5,10)
         yield [x, MX,MX-inter]
         x += 10
@@ -112,7 +113,7 @@ def poolFitness(pool):
         if flappy[0] > currentPipe[0]:
             score += 10
             currentPipe = generator.__next__()
-            
+
     return score
 
 def genFromParent(p1,p2):
@@ -140,4 +141,33 @@ def process(nb_pool, iteration=100):
             print(" --===--")
         pools = [genFromParent(mx[1],mx2[1]) for _ in range(nb_pool)]
 
-process(500,200)
+    log = open("flappy_log.flap","w")
+    NN = FNN()
+    NN.loadPool(mx[1])
+    score = 0
+    flappy = [0, 5]
+    generator = PipeGenerator()
+    currentPipe = generator.__next__()
+    log.write("PIPE "+str(currentPipe)+"\n")
+    log.write("POS "+str(flappy)+"\n")
+    while 0 <= flappy[1] <= 10 and score < 100:
+        dec = round(NN.forward([flappy[1],currentPipe[0]-flappy[0], currentPipe[1], currentPipe[2]])[0])
+        old = list(flappy)
+        flappy[0] += Hspeed
+        if dec == 1:
+            flappy[1] += Hspeed
+        else:
+            flappy[1] -= Hspeed
+        if not currentPipe[2] <= flappy[1] <= currentPipe[1]:#lineCollision(old,flappy,currentPipe[0],[currentPipe[2],currentPipe[1]]):
+            score += currentPipe[0] - flappy[0]
+            break
+        if flappy[0] > currentPipe[0]:
+            score += 10
+            currentPipe = generator.__next__()
+            log.write("PIPE "+str(currentPipe)+"\n")
+        log.write("POS "+str(flappy)+"\n")
+    log.close()
+
+
+
+process(500,50)
