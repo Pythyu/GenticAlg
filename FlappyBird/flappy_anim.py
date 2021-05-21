@@ -12,8 +12,9 @@ def height_converter(x):
 
 class Application:
     def __init__(self):
-        self.flappy_pos = [50,50]
+        self.flappy_pos = [0,0]
         self.next_pipe = None
+        self.flap = None
         self.w = 144*8
         self.h = 256
         self.file = open("flappy_log.flap","r")
@@ -21,7 +22,8 @@ class Application:
         self.tk = Tk()
         self.load_textures()
         self.can = Canvas(width=self.w,height=self.h)
-        self.can.create_image(0,0, image = self.bg_img)
+        for i in range(8):
+            self.can.create_image(144*i,0, image = self.bg_img)
         self.can.pack()
 
         self.update()
@@ -35,7 +37,10 @@ class Application:
         self.pipe_up_img = PhotoImage(file="imgs/pipe_up.gif")
         self.pipe_down_img = PhotoImage(file="imgs/pipe_down.gif")
     def update(self):
-        self.can.delete('all')
+        start_old = None
+        if self.flap != None:
+            start_old = self.flappy_pos
+            self.can.delete(self.flap)
         try:
             line = self.line_gen.__next__()
             if line[0:3] == "POS":
@@ -47,15 +52,14 @@ class Application:
                 #print(self.flappy_pos)
             elif line[0:4] == "PIPE":
                 self.next_pipe = ast.literal_eval(line[5:])
+                self.can.create_line(self.next_pipe[0]*2,0,self.next_pipe[0]*2,height_converter(self.next_pipe[1]))
+                self.can.create_line(self.next_pipe[0]*2,256,self.next_pipe[0]*2,height_converter(self.next_pipe[2]))
         except:
             pass
 
-        for i in range(8):
-            self.can.create_image(144*i,0, image = self.bg_img)
-        self.can.create_line(self.next_pipe[0]*2,0,self.next_pipe[0]*2,height_converter(self.next_pipe[1]))
-        self.can.create_line(self.next_pipe[0]*2,256,self.next_pipe[0]*2,height_converter(self.next_pipe[2]))
-        self.can.create_image(self.flappy_pos[0],self.flappy_pos[1],anchor="center",image=self.flappy_img)
-        self.can.create_image
+        self.flap = self.can.create_image(self.flappy_pos[0],self.flappy_pos[1],anchor="center",image=self.flappy_img)
+        if(start_old != None):
+            self.can.create_line(start_old[0],start_old[1],self.flappy_pos[0],self.flappy_pos[1],fill="red")
         self.tk.after(50, self.update)
 
 app = Application()
